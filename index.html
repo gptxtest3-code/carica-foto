@@ -412,13 +412,12 @@ submitBtn.addEventListener('click', async () => {
         fileData,
         mimeType: file.type || 'application/octet-stream'
       };
-      const res = await fetch(SCRIPT_URL, {
+      await fetch(SCRIPT_URL, {
         method: 'POST',
+        mode: 'no-cors',
         body: JSON.stringify(payload)
       });
-      const json = await res.json();
-      if (json.success) ok++;
-      else failed.push(file.name);
+      ok++;
     } catch (err) {
       failed.push(file.name);
     }
