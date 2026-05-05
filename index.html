@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Carica le tue foto</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F7F5F0;
+    --surface: #FFFFFF;
+    --border: #E2DDD6;
+    --border-strong: #C8C2B8;
+    --text: #1A1714;
+    --text-muted: #7A736A;
+    --text-hint: #B0A99F;
+    --accent: #2C5F2E;
+    --accent-light: #EAF3EB;
+    --accent-text: #1A3D1B;
+    --danger: #8B2F2F;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 2rem 1rem 4rem;
+  }
+
+  .container { width: 100%; max-width: 500px; }
+
+  .header { text-align: center; margin-bottom: 2.5rem; padding-top: 1rem; }
+  .header-icon {
+    width: 60px; height: 60px; border-radius: 18px;
+    background: var(--surface); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1.25rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .header-icon svg { width: 28px; height: 28px; color: var(--accent); stroke: currentColor; }
+  h1 {
+    font-family: 'Lora', serif;
+    font-size: 26px; font-weight: 500;
+    color: var(--text); letter-spacing: -0.3px;
+    margin-bottom: 6px;
+  }
+  .subtitle { font-size: 14px; color: var(--text-muted); line-height: 1.5; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.75rem;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+  }
+
+  .field { margin-bottom: 1.5rem; }
+  .field:last-child { margin-bottom: 0; }
+
+  label {
+    display: block;
+    font-size: 12px; font-weight: 500;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+
+  input[type="text"] {
+    width: 100%;
+    padding: 11px 14px;
+    font-size: 15px;
+    font-family: 'DM Sans', sans-serif;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg);
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  input[type="text"]:focus {
+    border-color: var(--accent);
+    background: #fff;
+  }
+  input[type="text"]::placeholder { color: var(--text-hint); }
+
+  .drop-zone {
+    border: 1.5px dashed var(--border-strong);
+    border-radius: var(--radius);
+    padding: 2.25rem 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    background: var(--bg);
+    position: relative;
+  }
+  .drop-zone:hover, .drop-zone.over {
+    border-color: var(--accent);
+    background: var(--accent-light);
+  }
+  .drop-zone input[type="file"] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+  }
+  .drop-icon { margin: 0 auto 10px; opacity: 0.5; }
+  .drop-main { font-size: 14px; color: var(--text-muted); margin-bottom: 4px; }
+  .drop-hint { font-size: 12px; color: var(--text-hint); }
+
+  .preview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .preview-thumb {
+    aspect-ratio: 1;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    position: relative;
+    border: 1px solid var(--border);
+    background: var(--bg);
+  }
+  .preview-thumb img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+  }
+  .preview-thumb .file-icon {
+    width: 100%; height: 100%;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 4px; font-size: 11px; color: var(--text-muted);
+  }
+  .preview-thumb .remove {
+    position: absolute; top: 4px; right: 4px;
+    width: 20px; height: 20px; border-radius: 50%;
+    background: rgba(0,0,0,0.6); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; cursor: pointer; border: none;
+    line-height: 1; font-family: sans-serif;
+  }
+
+  .progress-bar-wrap {
+    display: none;
+    height: 3px; background: var(--border);
+    border-radius: 2px; margin-top: 12px; overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%; background: var(--accent);
+    border-radius: 2px; width: 0%;
+    transition: width 0.3s ease;
+  }
+  .progress-label {
+    display: none;
+    font-size: 12px; color: var(--text-muted);
+    margin-top: 6px; text-align: center;
+  }
+
+  .submit-btn {
+    width: 100%;
+    padding: 14px;
+    margin-top: 1.5rem;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 15px; font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+    letter-spacing: 0.01em;
+  }
+  .submit-btn:hover:not(:disabled) { opacity: 0.88; }
+  .submit-btn:active:not(:disabled) { transform: scale(0.99); }
+  .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .notice {
+    font-size: 12px; color: var(--text-hint);
+    text-align: center; margin-top: 1rem;
+    line-height: 1.5;
+  }
+
+  /* Error */
+  .error-msg {
+    display: none;
+    background: #FDF2F2; border: 1px solid #F0C4C4;
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    font-size: 13px; color: var(--danger);
+    margin-top: 12px;
+  }
+
+  /* Success screen */
+  .success-screen {
+    display: none;
+    text-align: center;
+    padding: 2.5rem 1rem;
+  }
+  .success-circle {
+    width: 64px; height: 64px; border-radius: 50%;
+    background: var(--accent-light);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1.25rem;
+  }
+  .success-circle svg { width: 28px; height: 28px; stroke: var(--accent); }
+  .success-screen h2 {
+    font-family: 'Lora', serif;
+    font-size: 22px; font-weight: 500;
+    margin-bottom: 8px;
+  }
+  .success-screen p { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+  .again-btn {
+    margin-top: 1.5rem;
+    padding: 10px 24px;
+    background: transparent;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    font-size: 14px; font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer; color: var(--text);
+    transition: background 0.15s;
+  }
+  .again-btn:hover { background: var(--bg); }
+
+  @media (max-width: 420px) {
+    .card { padding: 1.25rem; }
+    h1 { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="header-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="18" height="18" rx="3"/>
+        <circle cx="8.5" cy="8.5" r="1.5"/>
+        <polyline points="21 15 16 10 5 21"/>
+      </svg>
+    </div>
+    <h1>Carica le tue foto</h1>
+    <p class="subtitle">Inserisci il tuo nome e seleziona i file.<br>Le foto arriveranno direttamente in modo sicuro.</p>
+  </div>
+
+  <div id="formArea">
+    <div class="card">
+      <div class="field">
+        <label>Il tuo nome e cognome</label>
+        <input type="text" id="nameInput" placeholder="Es. Mario Rossi" autocomplete="name" />
+      </div>
+
+      <div class="field">
+        <label>Foto da caricare</label>
+        <div class="drop-zone" id="dropZone">
+          <input type="file" id="fileInput" accept="image/*,video/*" multiple />
+          <svg class="drop-icon" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#7A736A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="16 16 12 12 8 16"/>
+            <line x1="12" y1="12" x2="12" y2="21"/>
+            <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+          </svg>
+          <p class="drop-main">Trascina le foto qui, oppure clicca per sceglierle</p>
+          <p class="drop-hint">JPG, PNG, HEIC, MP4 — max 10 MB per file</p>
+        </div>
+        <div class="preview-grid" id="previewGrid"></div>
+        <div class="progress-bar-wrap" id="progressWrap">
+          <div class="progress-bar-fill" id="progressFill"></div>
+        </div>
+        <p class="progress-label" id="progressLabel"></p>
+        <div class="error-msg" id="errorMsg"></div>
+      </div>
+
+      <button class="submit-btn" id="submitBtn" disabled>Invia le foto</button>
+    </div>
+    <p class="notice">I tuoi file vengono inviati in modo sicuro e privato al destinatario</p>
+  </div>
+
+  <div class="success-screen" id="successScreen">
+    <div class="success-circle">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="20 6 9 17 4 12"/>
+      </svg>
+    </div>
+    <h2>Foto inviate!</h2>
+    <p>Grazie <strong id="sentName"></strong>, le tue foto<br>sono arrivate correttamente.</p>
+    <br>
+    <button class="again-btn" id="againBtn">Carica altre foto</button>
+  </div>
+
+</div>
+
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyYFH8-7I_PyKGrcEqE0Q7lfDRnXK2z2dOm16f82sQAMl3QLea7IoTQWPxSkaYcpDMfYw/exec";
+const MAX_SIZE_MB = 10;
+
+const nameInput = document.getElementById('nameInput');
+const fileInput = document.getElementById('fileInput');
+const dropZone = document.getElementById('dropZone');
+const previewGrid = document.getElementById('previewGrid');
+const submitBtn = document.getElementById('submitBtn');
+const progressWrap = document.getElementById('progressWrap');
+const progressFill = document.getElementById('progressFill');
+const progressLabel = document.getElementById('progressLabel');
+const errorMsg = document.getElementById('errorMsg');
+const formArea = document.getElementById('formArea');
+const successScreen = document.getElementById('successScreen');
+const sentName = document.getElementById('sentName');
+
+let selectedFiles = [];
+
+function updateSubmit() {
+  submitBtn.disabled = !(nameInput.value.trim() && selectedFiles.length > 0);
+}
+
+nameInput.addEventListener('input', updateSubmit);
+
+fileInput.addEventListener('change', e => addFiles(Array.from(e.target.files)));
+
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('over'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('over');
+  addFiles(Array.from(e.dataTransfer.files));
+});
+
+function addFiles(newFiles) {
+  hideError();
+  const tooBig = newFiles.filter(f => f.size > MAX_SIZE_MB * 1024 * 1024);
+  if (tooBig.length) {
+    showError(`Alcuni file superano i ${MAX_SIZE_MB} MB e non sono stati aggiunti: ${tooBig.map(f=>f.name).join(', ')}`);
+  }
+  const valid = newFiles.filter(f => f.size <= MAX_SIZE_MB * 1024 * 1024);
+  valid.forEach(f => {
+    selectedFiles.push(f);
+    addThumb(f, selectedFiles.length - 1);
+  });
+  updateSubmit();
+}
+
+function addThumb(file, idx) {
+  const div = document.createElement('div');
+  div.className = 'preview-thumb';
+  div.dataset.idx = idx;
+
+  if (file.type.startsWith('image/')) {
+    const img = document.createElement('img');
+    img.src = URL.createObjectURL(file);
+    div.appendChild(img);
+  } else {
+    const icon = document.createElement('div');
+    icon.className = 'file-icon';
+    icon.innerHTML = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7A736A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="3"/><polygon points="10 8 16 12 10 16 10 8" fill="#7A736A" stroke="none"/></svg><span>${file.name.split('.').pop().toUpperCase()}</span>`;
+    div.appendChild(icon);
+  }
+
+  const btn = document.createElement('button');
+  btn.className = 'remove';
+  btn.textContent = '×';
+  btn.title = 'Rimuovi';
+  btn.onclick = () => {
+    selectedFiles.splice(idx, 1);
+    div.remove();
+    // Remap indices
+    document.querySelectorAll('.preview-thumb').forEach((el, i) => el.dataset.idx = i);
+    updateSubmit();
+  };
+  div.appendChild(btn);
+  previewGrid.appendChild(div);
+}
+
+function showError(msg) {
+  errorMsg.textContent = msg;
+  errorMsg.style.display = 'block';
+}
+function hideError() { errorMsg.style.display = 'none'; }
+
+function toBase64(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result.split(',')[1]);
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+}
+
+submitBtn.addEventListener('click', async () => {
+  const nome = nameInput.value.trim();
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Invio in corso…';
+  progressWrap.style.display = 'block';
+  progressLabel.style.display = 'block';
+  hideError();
+
+  let ok = 0;
+  let failed = [];
+
+  for (let i = 0; i < selectedFiles.length; i++) {
+    const file = selectedFiles[i];
+    progressLabel.textContent = `Caricamento ${i + 1} di ${selectedFiles.length}: ${file.name}`;
+    progressFill.style.width = Math.round(((i) / selectedFiles.length) * 100) + '%';
+
+    try {
+      const fileData = await toBase64(file);
+      const payload = {
+        nome,
+        fileName: file.name,
+        fileData,
+        mimeType: file.type || 'application/octet-stream'
+      };
+      const res = await fetch(SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      });
+      const json = await res.json();
+      if (json.success) ok++;
+      else failed.push(file.name);
+    } catch (err) {
+      failed.push(file.name);
+    }
+  }
+
+  progressFill.style.width = '100%';
+
+  if (failed.length === 0) {
+    sentName.textContent = nome;
+    setTimeout(() => {
+      formArea.style.display = 'none';
+      successScreen.style.display = 'block';
+    }, 400);
+  } else {
+    progressWrap.style.display = 'none';
+    progressLabel.style.display = 'none';
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Riprova';
+    showError(`Errore nel caricamento di: ${failed.join(', ')}. Riprova.`);
+    if (ok > 0) showError(`${ok} file inviati con successo. Errore per: ${failed.join(', ')}.`);
+  }
+});
+
+document.getElementById('againBtn').addEventListener('click', () => {
+  selectedFiles = [];
+  previewGrid.innerHTML = '';
+  nameInput.value = '';
+  fileInput.value = '';
+  submitBtn.textContent = 'Invia le foto';
+  progressWrap.style.display = 'none';
+  progressLabel.style.display = 'none';
+  progressFill.style.width = '0%';
+  hideError();
+  updateSubmit();
+  formArea.style.display = 'block';
+  successScreen.style.display = 'none';
+});
+</script>
+</body>
+</html>
